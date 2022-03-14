@@ -1,0 +1,272 @@
+
+struct Pattern {
+  name str;
+  shape_index_to_corners List<List<Vec2i>>;
+  pattern_tiles List<PatternTile>;
+  x_offset Vec2i;
+  y_offset Vec2i;
+}
+
+func GetTileCenter(self &Pattern, loc Location) Vec2i {
+  ret self.x_offset * loc.group_x +
+      self.y_offset * loc.group_y +
+      self.pattern_tiles.get(loc.index_in_group).translate;
+}
+
+// using System;
+// using System.Collections;
+
+// using System.Collections.Generic;
+
+// namespace Geomancer.Model {
+// public class Pattern : IComparable<Pattern> {
+//   public static readonly string NAME = "Pattern";
+//   public class EqualityComparer : IEqualityComparer<Pattern> {
+//     public bool Equals(Pattern a, Pattern b) {
+//       ret a.Equals(b);
+//     }
+//     public int GetHashCode(Pattern a) {
+//       ret a.GetDeterministicHashCode();
+//     }
+//   }
+//   public class Comparer : IComparer<Pattern> {
+//     public int Compare(Pattern a, Pattern b) {
+//       ret a.CompareTo(b);
+//     }
+//   }
+//   private readonly int hashCode;
+//          public readonly string name;
+//   public readonly Vec2iImmListImmList shapeIndexToCorners;
+//   public readonly PatternTileImmList patternTiles;
+//   public readonly Vec2i xOffset;
+//   public readonly Vec2i yOffset;
+//   public Pattern(
+//       string name,
+//       Vec2iImmListImmList shapeIndexToCorners,
+//       PatternTileImmList patternTiles,
+//       Vec2i xOffset,
+//       Vec2i yOffset) {
+//     this.name = name;
+//     this.shapeIndexToCorners = shapeIndexToCorners;
+//     this.patternTiles = patternTiles;
+//     this.xOffset = xOffset;
+//     this.yOffset = yOffset;
+//     int hash = 0;
+//     hash = hash * 37 + name.GetDeterministicHashCode();
+//     hash = hash * 37 + shapeIndexToCorners.GetDeterministicHashCode();
+//     hash = hash * 37 + patternTiles.GetDeterministicHashCode();
+//     hash = hash * 37 + xOffset.GetDeterministicHashCode();
+//     hash = hash * 37 + yOffset.GetDeterministicHashCode();
+//     this.hashCode = hash;
+
+//   }
+//   public static bool operator==(Pattern a, Pattern b) {
+//     if object.ReferenceEquals(a, nul))
+//       ret object.ReferenceEquals(b, null);
+//     ret a.Equals(b);
+//   }
+//   public static bool operator!=(Pattern a, Pattern b) {
+//     if object.ReferenceEquals(a, nul))
+//       ret !object.ReferenceEquals(b, null);
+//     ret !a.Equals(b);
+//   }
+//   public override bool Equals(object obj) {
+//     if obj == null {
+//       ret false;
+//     }
+//     if !(obj is Pattern) {
+//       ret false;
+//     }
+//     that = obj as Pattern;
+//     ret true
+//                && name.Equals(that.name)
+//         && shapeIndexToCorners.Equals(that.shapeIndexToCorners)
+//         && patternTiles.Equals(that.patternTiles)
+//         && xOffset.Equals(that.xOffset)
+//         && yOffset.Equals(that.yOffset)
+//         ;
+//   }
+//   public override int GetHashCode() {
+//     ret GetDeterministicHashCode();
+//   }
+//   public int GetDeterministicHashCode() { ret hashCode; }
+//   public int CompareTo(Pattern that) {
+//     if name != that.name {
+//       ret name.CompareTo(that.name);
+//     }
+//     if shapeIndexToCorners != that.shapeIndexToCorners {
+//       ret shapeIndexToCorners.CompareTo(that.shapeIndexToCorners);
+//     }
+//     if patternTiles != that.patternTiles {
+//       ret patternTiles.CompareTo(that.patternTiles);
+//     }
+//     if xOffset != that.xOffset {
+//       ret xOffset.CompareTo(that.xOffset);
+//     }
+//     if yOffset != that.yOffset {
+//       ret yOffset.CompareTo(that.yOffset);
+//     }
+//     ret 0;
+//   }
+//   public override string ToString() { ret DStr(); }
+//   public string DStr() {
+//     ret "Pattern(" +
+//         name.DStr() + ", " +
+//         shapeIndexToCorners.DStr() + ", " +
+//         patternTiles.DStr() + ", " +
+//         xOffset.DStr() + ", " +
+//         yOffset.DStr()
+//         + ")";
+
+//     }
+//     public static Pattern Parse(ParseSource source) {
+//       source.Expect(NAME);
+//       source.Expect("(");
+//       name = source.ParseStr();
+//       source.Expect(",");
+//       shapeIndexToCorners = Vec2iImmListImmList.Parse(source);
+//       source.Expect(",");
+//       patternTiles = PatternTileImmList.Parse(source);
+//       source.Expect(",");
+//       xOffset = Vec2i.Parse(source);
+//       source.Expect(",");
+//       yOffset = Vec2i.Parse(source);
+//       source.Expect(")");
+//       ret Pattern(name, shapeIndexToCorners, patternTiles, xOffset, yOffset);
+//   }
+    
+    
+func DistanceBetween(locA Location, locB Location) int {
+  ret GetTileCenter(locA).distance(GetTileCenter(locB));
+}
+
+
+//     private static double DegreesToRadians(double angle) {
+//       ret Math.PI * angle / 180.0;
+//     }
+
+//     public List<Vec2i> GetRelativeCornerPositions(Location loc) {
+//       patternTile = patternTiles[loc.index_in_group];
+//       int shapeIndex = patternTile.shapeIndex;
+//       double rotateRadians = patternTile.rotateRadianards / 1000f;
+//       corners = shapeIndexToCorners[shapeIndex];
+
+//       List<Vec2i> results = List<Vec2i>();
+
+//       for (int i = 0; i < corners.Count; i++) {
+//         Vec2i unrotatedCorner = corners[i];
+//         Vec2i rotatedCorner =
+//             Vec2i(
+//                 (int)(unrotatedCorner.x * Math.Cos(rotateRadians) -
+//                     unrotatedCorner.y * Math.Sin(rotateRadians)),
+//                 (int)(unrotatedCorner.y * Math.Cos(rotateRadians) +
+//                     unrotatedCorner.x * Math.Sin(rotateRadians)));
+//         results!.add(rotatedCorner);
+//       }
+
+//       ret results;
+//     }
+
+//     public List<Vec2i> GetCornerPositions(Location loc) {
+//       center = GetTileCenter(loc);
+//       List<Vec2i> results = List<Vec2i>();
+//       foreach (var relativeCorner in GetRelativeCornerPositions(loc)) {
+//         results!.add(center.plus(relativeCorner));
+//       }
+//       ret results;
+//     }
+
+func getRelativeAdjacentLocations(
+  pattern &Pattern,
+  tileIndex int,
+  adjacentCornersToo bool)
+List<Location> {
+  result = HashSet<Location, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator());
+  tile = pattern.pattern_tiles.get(tileIndex);
+  foreach sideAdjacency in tile.side_index_to_side_adjacencies {
+    location =
+        Location(
+            sideAdjacency.group_relative_x,
+            sideAdjacency.group_relative_y,
+            sideAdjacency.tile_index);
+    if not result.contains(location) {
+      result!.add(location);
+    }
+  }
+  if adjacentCornersToo {
+    foreach cornerAdjacencies in tile.corner_index_to_corner_adjacencies {
+      foreach cornerAdjacency in cornerAdjacencies {
+        location = Location(cornerAdjacency.group_relative_x, cornerAdjacency.group_relative_y, cornerAdjacency.tile_index);
+        if not result.contains(location) {
+          result!.add(location);
+        }
+      }
+    }
+  }
+  ret result.List();
+}
+
+// todo: optimize: dont call GetAdjacentLocations
+func IsAdjacent(
+  pattern &Pattern, a Location, b Location, considerCornersAdjacent bool)
+bool {
+  result = List<Location>();
+  foreach adjacentLoc in pattern.GetAdjacentLocations(a, considerCornersAdjacent) {
+    if b == adjacentLoc {
+      ret true;
+    }
+  }
+  ret false;
+}
+
+func GetAdjacentLocations(
+  pattern &Pattern, loc Location, considerCornersAdjacent bool)
+List<Location> {
+  result = List<Location>();
+  foreach relativeLoc in pattern.getRelativeAdjacentLocations(loc.index_in_group, considerCornersAdjacent) {
+    result!.add(Location(
+      loc.group_x + relativeLoc.group_x,
+      loc.group_y + relativeLoc.group_y,
+      relativeLoc.index_in_group));
+  }
+  ret result;
+}
+
+func GetAdjacentLocations(
+  pattern &Pattern,
+  sourceLocs &HashSet<Location, LocationHasher, LocationEquator>,
+  includeSourceLocs bool,
+  considerCornersAdjacent bool)
+HashSet<Location, LocationHasher, LocationEquator> {
+  result =
+      HashSet<Location, LocationHasher, LocationEquator>(
+          LocationHasher(), LocationEquator());
+  foreach originalLocation in sourceLocs {
+    adjacents = pattern.GetAdjacentLocations(originalLocation, considerCornersAdjacent);
+    if includeSourceLocs {
+      if not adjacents.contains(originalLocation) {
+        adjacents!.add(originalLocation);
+      }
+    }
+    foreach adjacentLocation in adjacents {
+      if includeSourceLocs or not sourceLocs.contains(adjacentLocation) {
+        if not result.contains(adjacentLocation) {
+          result!.add(adjacentLocation);
+        }
+      }
+    }
+  }
+  ret result;
+}
+
+//     public bool LocationsAreAdjacent(Location a, Location b, bool considerCornersAdjacent) {
+//       locsAdjacentToA = GetAdjacentLocations(a, considerCornersAdjacent);
+//       ret 0 <= locsAdjacentToA.FindIndex(delegate (Location hay) { ret hay == b; });
+//     }
+
+func GetDistanceBetween(pattern &Pattern, locA Location, locB Location) int {
+  ret pattern.GetTileCenter(locA).distance(pattern.GetTileCenter(locB));
+}
+// }
+       
+// }

@@ -1,0 +1,298 @@
+
+func MakeMap(rand &!XS32Rand) PatternMap<bool> {
+  considerCornersAdjacent = true;
+  map_0 = MakeCircleMap(&!rand, make_pentagon_9_pattern(), considerCornersAdjacent);
+  map_1 = CellularAutomata(considerCornersAdjacent, &!rand, &map_0);
+  map_2 = CellularAutomata(considerCornersAdjacent, &!rand, &map_1);
+  
+  map_3 = PatternMap<bool>(make_pentagon_9_pattern());
+  foreach [loc, walkable] in map_2.tiles {
+    if walkable {
+      map_3.tiles!.add(loc, true);
+    }
+  }
+
+  ConnectIslands(&!rand, &!map_3);
+
+  locs =
+      map_3.tiles.KeysIter()
+      .HashSet(LocationHasher(), LocationEquator());
+  boundary_locs =
+      map_3.pattern.GetAdjacentLocations(&locs, false, considerCornersAdjacent);
+  foreach boundary_loc in boundary_locs {
+    map_3.tiles!.add(boundary_loc, false);
+  }
+
+  ret map_3;
+}
+
+
+struct XS32Rand {
+  seed! i64;
+}
+// From https://github.com/cgmb/euler/blob/a906355343dc0d320858a7b00504040d04c053f7/misc/rng.c
+// State must point to a non-zero value.
+// Based on "An Experimental Exploration of Marsaglia's xorshift Generators, Scrambled" (2016)
+func Next(self &!XS32Rand) i64 {
+  x = self.seed;
+  set x = x xor (x rshift 12);
+  set x = x xor (x lshift 25);
+  set x = x xor (x rshift 27);
+  set self.seed = x;
+  ret x * 2685821657736338717i64 rshift 32;
+}
+
+
+
+func MakeCircleMap(rand &!XS32Rand, pattern Pattern, considerCornersAdjacent bool) PatternMap<bool> {
+  map = PatternMap<bool>(pattern);
+
+  explorer =
+      PatternExplorer(
+          &map.pattern,
+          considerCornersAdjacent,
+          (a, b) => ApatheticPrioritizer(a, b), // prioritizer
+          (_, _) => true, // filter
+          Location(0, 0, 0));
+
+  results =
+      explorer!.ExploreWhile(
+          { map.pattern.GetDistanceBetween(_, Location(0, 0, 0)) < 18000 },
+          -1,
+          -1000000);
+
+  foreach loc in &results {
+    map.tiles!.add(loc, (rand!.Next() mod 2i64) == 0i64);
+  }
+
+  ret map;
+}
+
+func CellularAutomata(
+    considerCornersAdjacent bool,
+    rand &!XS32Rand,
+    map &PatternMap<bool>)
+PatternMap<bool> {
+  new_map = PatternMap<bool>(make_pentagon_9_pattern());
+
+  foreach [loc, _] in &map.tiles {
+    neighbors = map.GetAdjacentExistingLocations(loc, considerCornersAdjacent);
+    num_walkable_neighbors = 0;
+    foreach neighbor in &neighbors {
+      if map.tiles.get(neighbor).get("wat") {
+        set num_walkable_neighbors = num_walkable_neighbors + 1;
+      }
+    }
+    new_impassable =
+      if num_walkable_neighbors * 2 == neighbors.len() {
+        (rand!.Next() mod 2i64) == 0i64
+      } else {
+        num_walkable_neighbors > neighbors.len() / 2
+      };
+
+    new_map.tiles!.add(loc, new_impassable);
+  }
+
+  ret new_map;
+}
+
+
+func ConnectIslands(
+    rand &!XS32Rand,
+    map &!PatternMap<bool>) {
+  nextIslandIndex = 0;
+  locToIslandIndex = HashMap<Location, int>(LocationHasher(), LocationEquator());
+  islandIndexToArbitraryMemberLoc = HashMap<int, Location>(IntHasher(), IntEquator());
+
+  println("Finding spark locs!");
+  foreach [sparkLoc, b] in &map.tiles {
+    if not locToIslandIndex.ContainsKey(sparkLoc) {
+      println("Found spark loc: {sparkLoc}");
+      islandIndex = set nextIslandIndex = nextIslandIndex + 1;
+      islandIndexToArbitraryMemberLoc!.add(islandIndex, sparkLoc);
+      FloodRealm(&map, &!locToIslandIndex, islandIndex, sparkLoc);
+    }
+  }
+
+  islandIndexToKingdomId = []int(nextIslandIndex, {_});
+  while ConnectDistinctKingdoms(map, &!locToIslandIndex, &islandIndexToArbitraryMemberLoc, &!islandIndexToKingdomId) {
+  }
+  
+}
+
+func FloodRealm(
+    map &PatternMap<bool>,
+    locToIslandIndex &!HashMap<Location, int, LocationHasher, LocationEquator>,
+    islandIndex int,
+    thisLoc Location) {
+  if locToIslandIndex.ContainsKey(thisLoc) {
+    ret void();
+  }
+  locToIslandIndex!.add(thisLoc, islandIndex);
+  neighbors = map.GetAdjacentExistingLocations(thisLoc, false);
+  foreach neighborLoc in &neighbors {
+    FloodRealm(map, locToIslandIndex, islandIndex, neighborLoc);
+  }
+}
+
+func ConnectDistinctKingdoms(
+    map &!PatternMap<bool>,
+    locToIslandIndex &!HashMap<Location, int, LocationHasher, LocationEquator>,
+    islandIndexToArbitraryMemberLoc &HashMap<int, Location, IntHasher, IntEquator>,
+    islandIndexToKingdomId &![]int)
+// True if we united any distinct kingdoms
+bool {
+  println("Looking for kingdoms to connect!");
+  tentativeSourceIslandIndex = 0;
+  tentativeSourceKingdomId = islandIndexToKingdomId[tentativeSourceIslandIndex];
+  foreach tentativeTargetIslandIndex in range(0, islandIndexToKingdomId.len()) {
+    tentativeTargetKingdomId = islandIndexToKingdomId[tentativeTargetIslandIndex];
+    println("Considering other island {tentativeTargetIslandIndex} kingdom {tentativeTargetKingdomId}");
+    if tentativeTargetKingdomId != tentativeSourceKingdomId {
+      tentativeSourceLoc = islandIndexToArbitraryMemberLoc.get(tentativeSourceIslandIndex).get();
+      tentativeTargetLoc = islandIndexToArbitraryMemberLoc.get(tentativeTargetIslandIndex).get();
+
+      println("Getting path from {tentativeSourceLoc} to {tentativeTargetLoc}!");
+      path =
+          Drive(
+              &map, &locToIslandIndex, islandIndexToKingdomId, tentativeSourceLoc, tentativeTargetLoc);
+
+      pathLocsSet =
+          HashSet<Location, LocationHasher, LocationEquator>(
+              LocationHasher(), LocationEquator());
+      foreach loc in &path {
+        pathLocsSet!.add(loc);
+      }
+      pathAndNeighborLocs =
+          map.pattern.GetAdjacentLocations(
+              &pathLocsSet, true, false);
+      pathAndNeighborKingdomIds =
+          HashSet<int, IntHasher, IntEquator>(
+              IntHasher(), IntEquator());
+
+      println("Uniting kingdoms:");
+      foreach loc in pathAndNeighborLocs {
+        if locToIslandIndex.ContainsKey(loc) {
+          kingdomId = islandIndexToKingdomId[locToIslandIndex.get(loc).get()];
+          if not pathAndNeighborKingdomIds.contains(kingdomId) {
+            println("- Kingdom {kingdomId}!");
+            pathAndNeighborKingdomIds!.add(kingdomId);
+          }
+        }
+      }
+
+      // Now we need to unite all these kingdoms the path touches.
+      victoriousKingdomId = pathAndNeighborKingdomIds.GetRandomElement(0).get();
+      println("...into victorious kingdom {victoriousKingdomId}!");
+
+      arbitraryReassigningIslandIndex = -1;
+      foreach [islandIndex, hayKingdomId] in islandIndexToKingdomId.entries() {
+        if pathAndNeighborKingdomIds.contains(hayKingdomId) and hayKingdomId != victoriousKingdomId {
+          println("Reassigning island index {islandIndex} from kingdom {hayKingdomId} to {victoriousKingdomId}");
+          set islandIndexToKingdomId[islandIndex] = victoriousKingdomId;
+          set arbitraryReassigningIslandIndex = islandIndex;
+        }
+      }
+      vassert(arbitraryReassigningIslandIndex != -1);
+      println("Arbitrary member island index {arbitraryReassigningIslandIndex}");
+
+      foreach loc in &path {
+        println("Creating path loc {loc} as part of island index {arbitraryReassigningIslandIndex}!");
+        map.tiles!.add(loc, true);
+        locToIslandIndex!.add(loc, arbitraryReassigningIslandIndex);
+      }
+
+      ret true;
+    }
+  }
+
+  ret false;
+}
+
+
+func Drive(
+    map &PatternMap<bool>,
+    locToIslandIndex &HashMap<Location, int, LocationHasher, LocationEquator>,
+    islandIndexToKingdomId &![]int,
+    sourceLoc Location,
+    targetLoc Location)
+// Returns a path that grazes *at least* two different kingdoms.
+[]Location {
+
+  sourceKingdomId = islandIndexToKingdomId[locToIslandIndex.get(sourceLoc).get("bork a")];
+  targetKingdomId = islandIndexToKingdomId[locToIslandIndex.get(targetLoc).get("bork b")];
+  vassert(sourceKingdomId != targetKingdomId);
+
+  [originalPathWithoutSource] =
+    Go(
+        map.pattern,
+        sourceLoc,
+        targetLoc,
+        false,
+        (from, to, distanceSoFar) => {
+          map.pattern.IsAdjacent(from, to, false)
+        });
+
+  // Should be impossible because we're just navigating on the pattern, not the terrain.
+  vassert(originalPathWithoutSource.len() > 0, "No pattern path?");
+
+  vassert(originalPathWithoutSource[originalPathWithoutSource.len() - 1] == targetLoc);
+  println("Have path! len {originalPathWithoutSource.len()}");
+
+  vassert(originalPathWithoutSource[0] != sourceLoc);
+  // We don't get the source location included, so lets add that.
+  originalPath = List<Location>();
+  originalPath!.add(sourceLoc);
+  foreach x in originalPathWithoutSource {
+    originalPath!.add(x);
+  }
+
+  println("Added original loc!");
+
+  // The index in the originalPath of the latest step that's in a kingdom that's not the target kingdom
+  lastForeignKingdomStepIndex = 0;
+  maybeFirstTargetKingdomStepIndex Opt<int> = None<int>();
+  foreach [index, stepLoc] in originalPath.entries() {
+    if not locToIslandIndex.ContainsKey(stepLoc) {
+      // Tile doesnt exist, keep looking
+    } else if islandIndexToKingdomId[locToIslandIndex.get(stepLoc).get("bork c")] == targetKingdomId {
+      if maybeFirstTargetKingdomStepIndex.isEmpty() {
+        set maybeFirstTargetKingdomStepIndex = Some(index);
+      }
+    } else {
+      set lastForeignKingdomStepIndex = index;
+    }
+  }
+  firstTargetKingdomStepIndex = maybeFirstTargetKingdomStepIndex.get("bork d");
+
+  println("Found subpath! {lastForeignKingdomStepIndex} to {firstTargetKingdomStepIndex}");
+
+  // originalPath might have cut through foreign island locs, and it might have also reached
+  // a target kingdom loc before the target loc.
+  // Just make a path between from last foreign kingdom loc and the first target kingdom loc.
+
+  // Should exist
+  vassert(map.tiles.ContainsKey(originalPath.get(lastForeignKingdomStepIndex)));
+  // Well actually, lets start one past it, because this should be empty space.
+  start_index = lastForeignKingdomStepIndex + 1;
+  // Should be empty space
+  vassert(not map.tiles.ContainsKey(originalPath.get(start_index)));
+
+  // Should exist
+  vassert(map.tiles.ContainsKey(originalPath.get(lastForeignKingdomStepIndex)));
+  // And lets start one before the end, should also be empty space.
+  last_index = firstTargetKingdomStepIndex - 1;
+  // Should be empty space
+  vassert(not map.tiles.ContainsKey(originalPath.get(last_index)));
+
+  path = List<Location>();
+
+  foreach index in range(start_index, last_index + 1) {
+    // Should be empty space
+    vassert(not map.tiles.ContainsKey(originalPath.get(index)));
+
+    path!.add(originalPath.get(index));
+  }
+
+  ret (path).toArray();
+}

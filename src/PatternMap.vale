@@ -1,0 +1,68 @@
+
+struct PatternMap<T> {
+  pattern Pattern;
+  tiles HashMap<Location, T, LocationHasher, LocationEquator>;
+}
+
+func PatternMap<T>(pattern Pattern) PatternMap<T> {
+  PatternMap<T>(
+      pattern,
+      HashMap<Location, T, LocationHasher, LocationEquator>(
+          LocationHasher(), LocationEquator()))
+}
+
+func TileExists<T>(self &PatternMap<T>, location Location) bool {
+  ret self.tiles.ContainsKey(location);
+}
+
+func GetAdjacentExistingLocations<T>(
+    self &PatternMap<T>,
+    loc Location,
+    adjacentCornersToo bool)
+List<Location> {
+  result = List<Location>();
+  self.pattern.GetAdjacentLocations(loc, adjacentCornersToo).each(adjacentLoc => {
+    if (self.TileExists(adjacentLoc)) {
+      result!.add(adjacentLoc);
+    }
+  });
+  ret result;
+}
+
+func GetAdjacentExistingLocations<T>(
+    self &PatternMap<T>,
+    sourceLocs &HashSet<Location, LocationHasher, LocationEquator>,
+    includeSourceLocs bool,
+    adjacentCornersToo bool)
+HashSet<Location, LocationHasher, LocationEquator> {
+  adjacents =
+    self.pattern.GetAdjacentLocations(sourceLocs, includeSourceLocs, adjacentCornersToo);
+
+  result =
+    HashSet<Location, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator());
+  foreach adjacentLoc in adjacents {
+    if self.TileExists(adjacentLoc) {
+      result!.add(adjacentLoc);
+    }
+  }
+  ret result;
+}
+
+//func GetTileCenter<T>(self &PatternMap<T>, loc Location) Vec3i {
+//  [elevation, _] = self.tiles.get(loc).get("GetTileCenter: No tile there!");
+//  positionVec2 = self.pattern.GetTileCenter(loc);
+//  ret Vec3i(
+//      positionVec2.x,
+//      positionVec2.y,
+//      elevation * elevationStepHeight);
+//}
+
+func GetElevationDifference<T>(
+    self PatternMap<T>,
+    locA Location,
+    locB Location)
+int {
+  ret Math.Abs(
+      self.tiles.get(locA).get("GetElevationDifference: No tile there! (a)").0 -
+      self.tiles.get(locB).get("GetElevationDifference: No tile there! (b)").0);
+}

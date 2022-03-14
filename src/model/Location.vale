@@ -1,0 +1,145 @@
+
+struct Location imm {
+  group_x int;
+  group_y int;
+  index_in_group int;
+}
+
+func clone(a Location) Location { a }
+func ==(a Location, b Location) bool {
+  [a_group_x, a_group_y, a_index_in_group] = a;
+  [b_group_x, b_group_y, b_index_in_group] = b;
+  ret a_group_x == b_group_x and a_group_y == b_group_y and a_index_in_group == b_index_in_group;
+}
+
+struct LocationHasher { }
+func __call(this &LocationHasher, loc Location) int {
+  hash = 0;
+  set hash = 33 * hash + loc.group_x;
+  set hash = 37 * hash + loc.group_y;
+  set hash = 41 * hash + loc.index_in_group;
+  ret hash;
+}
+
+struct LocationEquator { }
+func __call(this &LocationEquator, a Location, b Location) bool {
+  (a.group_x == b.group_x) and (a.group_y == b.group_y) and (a.index_in_group == b.index_in_group)
+}
+
+func +(s str, loc Location) str {
+  s + ("[{loc.group_x}, {loc.group_y}, {loc.index_in_group}]")
+}
+
+func Compare(a Location, b Location) int {
+  if a.group_x != b.group_x {
+    ret signum(a.group_x - b.group_x);
+  }
+  if a.group_y != b.group_y {
+    ret signum(a.group_y - b.group_y);
+  }
+  ret signum(a.index_in_group - b.index_in_group);
+}
+
+
+// using System;
+// using System.Collections;
+
+// using System.Collections.Generic;
+
+// namespace Geomancer.Model {
+// public class Location : IComparable<Location> {
+//   public static readonly string NAME = "Location";
+//   public class EqualityComparer : IEqualityComparer<Location> {
+//     public bool Equals(Location a, Location b) {
+//       return a.Equals(b);
+//     }
+//     public int GetHashCode(Location a) {
+//       return a.GetDeterministicHashCode();
+//     }
+//   }
+//   public class Comparer : IComparer<Location> {
+//     public int Compare(Location a, Location b) {
+//       return a.CompareTo(b);
+//     }
+//   }
+//   private readonly int hashCode;
+//          public readonly int groupX;
+//   public readonly int groupY;
+//   public readonly int index_in_group;
+//   public Location(
+//       int groupX,
+//       int groupY,
+//       int index_in_group) {
+//     this.groupX = groupX;
+//     this.groupY = groupY;
+//     this.index_in_group = index_in_group;
+//     int hash = 0;
+//     hash = hash * 37 + groupX;
+//     hash = hash * 37 + groupY;
+//     hash = hash * 37 + index_in_group;
+//     this.hashCode = hash;
+
+//   }
+//   public static bool operator==(Location a, Location b) {
+//     if (object.ReferenceEquals(a, null))
+//       return object.ReferenceEquals(b, null);
+//     return a.Equals(b);
+//   }
+//   public static bool operator!=(Location a, Location b) {
+//     if (object.ReferenceEquals(a, null))
+//       return !object.ReferenceEquals(b, null);
+//     return !a.Equals(b);
+//   }
+//   public override bool Equals(object obj) {
+//     if (obj == null) {
+//       return false;
+//     }
+//     if (!(obj is Location)) {
+//       return false;
+//     }
+//     var that = obj as Location;
+//     return true
+//                && groupX.Equals(that.groupX)
+//         && groupY.Equals(that.groupY)
+//         && index_in_group.Equals(that.index_in_group)
+//         ;
+//   }
+//   public override int GetHashCode() {
+//     return GetDeterministicHashCode();
+//   }
+//   public int GetDeterministicHashCode() { return hashCode; }
+//   public int CompareTo(Location that) {
+//     if (groupX != that.groupX) {
+//       return groupX.CompareTo(that.groupX);
+//     }
+//     if (groupY != that.groupY) {
+//       return groupY.CompareTo(that.groupY);
+//     }
+//     if (index_in_group != that.index_in_group) {
+//       return index_in_group.CompareTo(that.index_in_group);
+//     }
+//     return 0;
+//   }
+//   public override string ToString() { return DStr(); }
+//   public string DStr() {
+//     return "Location(" +
+//         groupX + ", " +
+//         groupY + ", " +
+//         index_in_group
+//         + ")";
+
+//     }
+//     public static Location Parse(ParseSource source) {
+//       source.Expect(NAME);
+//       source.Expect("(");
+//       var groupX = source.ParseInt();
+//       source.Expect(",");
+//       var groupY = source.ParseInt();
+//       source.Expect(",");
+//       var index_in_group = source.ParseInt();
+//       source.Expect(")");
+//       return new Location(groupX, groupY, index_in_group);
+//   }
+// }
+       
+// }

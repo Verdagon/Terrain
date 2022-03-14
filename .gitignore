@@ -1,0 +1,4 @@
+build
+src/*.cs
+src/Model/*.cs
+src/Network/*.cs

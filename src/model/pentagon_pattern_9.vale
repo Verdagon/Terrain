@@ -1,0 +1,297 @@
+func make_pentagon_9_pattern() Pattern {
+  ret Pattern(
+    "pentagon9",
+    List([#][ // shapeIndexToCorners
+      List([#][ // corner for shape 0
+        Vec2i(-132, -497),
+        Vec2i(378, -497),
+        Vec2i(732, 313),
+        Vec2i(-130, 504),
+        Vec2i(-855, 0)
+      ]),
+      List([#][ // corner for shape 1
+        Vec2i(132, -497),
+        Vec2i(855, -1),
+        Vec2i(130, 504),
+        Vec2i(-732, 313),
+        Vec2i(-378, -497)
+      ])
+    ]),
+    List([#][ // patternTiles
+      PatternTile(
+        0, 0, Vec2i(0, 0),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(0, -1, 6, 4),
+          PatternSideAdjacency(1, 0, 1, 1),
+          PatternSideAdjacency(0, 0, 2, 1),
+          PatternSideAdjacency(0, 0, 1, 3),
+          PatternSideAdjacency(-1, -1, 7, 1)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(-1, -1, 7, 1),
+            PatternCornerAdjacency(0, -1, 6, 0)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, -1, 6, 4),
+            PatternCornerAdjacency(1, 0, 1, 2)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 2, 2),
+            PatternCornerAdjacency(1, 0, 1, 1),
+            PatternCornerAdjacency(1, 0, 3, 3)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 1, 4),
+            PatternCornerAdjacency(0, 0, 2, 1)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 1, 3),
+            PatternCornerAdjacency(-1, -1, 6, 3),
+            PatternCornerAdjacency(-1, -1, 7, 2)
+          ])
+        ])
+      ),
+      PatternTile( // tile 1
+        1, 1772, Vec2i(-697, 774),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(0, 0, 3, 3),
+          PatternSideAdjacency(-1, 0, 0, 1),
+          PatternSideAdjacency(-1, -1, 6, 3),
+          PatternSideAdjacency(0, 0, 0, 3),
+          PatternSideAdjacency(0, 0, 2, 0)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(0, 0, 2, 0),
+            PatternCornerAdjacency(0, 0, 3, 4)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(-1, 0, 0, 2),
+            PatternCornerAdjacency(-1, 0, 2, 2),
+            PatternCornerAdjacency(0, 0, 3, 3)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(-1, -1, 6, 4),
+            PatternCornerAdjacency(-1, 0, 0, 1)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 0, 4),
+            PatternCornerAdjacency(-1, -1, 7, 2),
+            PatternCornerAdjacency(-1, -1, 6, 3)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 0, 0, 3),
+            PatternCornerAdjacency(0, 0, 2, 1)
+          ])
+        ])
+      ),
+      PatternTile( // tile 2
+        0, 4913, Vec2i(274, 972),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(0, 0, 1, 4),
+          PatternSideAdjacency(0, 0, 0, 2),
+          PatternSideAdjacency(1, 0, 3, 2),
+          PatternSideAdjacency(0, 0, 4, 0),
+          PatternSideAdjacency(0, 0, 3, 4)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(0, 0, 1, 0),
+            PatternCornerAdjacency(0, 0, 3, 4)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 0, 0, 3),
+            PatternCornerAdjacency(0, 0, 1, 4)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 0, 2),
+            PatternCornerAdjacency(1, 0, 1, 1),
+            PatternCornerAdjacency(1, 0, 3, 3)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 4, 1),
+            PatternCornerAdjacency(1, 0, 3, 2),
+            PatternCornerAdjacency(1, 0, 5, 2)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 3, 0),
+            PatternCornerAdjacency(0, 0, 4, 0)
+          ])
+        ])
+      ),
+      PatternTile( // tile 3
+        0, 8055, Vec2i(-406, 1846),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(0, 0, 4, 4),
+          PatternSideAdjacency(0, 0, 5, 2),
+          PatternSideAdjacency(-1, 0, 2, 2),
+          PatternSideAdjacency(0, 0, 1, 0),
+          PatternSideAdjacency(0, 0, 2, 4)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(0, 0, 2, 4),
+            PatternCornerAdjacency(0, 0, 4, 0)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 0, 4, 4),
+            PatternCornerAdjacency(0, 0, 5, 3)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(-1, 0, 2, 3),
+            PatternCornerAdjacency(-1, 0, 4, 1),
+            PatternCornerAdjacency(0, 0, 5, 2)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 1, 1),
+            PatternCornerAdjacency(-1, 0, 0, 2),
+            PatternCornerAdjacency(-1, 0, 2, 2)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 1, 0),
+            PatternCornerAdjacency(0, 0, 2, 0)
+          ])
+        ])
+      ),
+      PatternTile( // tile 4
+        1, 4913, Vec2i(573, 2028),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(0, 0, 2, 3),
+          PatternSideAdjacency(1, 0, 5, 1),
+          PatternSideAdjacency(0, 0, 7, 3),
+          PatternSideAdjacency(0, 0, 5, 3),
+          PatternSideAdjacency(0, 0, 3, 0)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(0, 0, 2, 4),
+            PatternCornerAdjacency(0, 0, 3, 0)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 2, 3),
+            PatternCornerAdjacency(1, 0, 3, 2),
+            PatternCornerAdjacency(1, 0, 5, 2)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 7, 4),
+            PatternCornerAdjacency(1, 0, 5, 1)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 5, 4),
+            PatternCornerAdjacency(0, 0, 6, 2),
+            PatternCornerAdjacency(0, 0, 7, 3)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 0, 3, 1),
+            PatternCornerAdjacency(0, 0, 5, 3)
+          ])
+        ])
+      ),
+      PatternTile( // tile 5
+        0, 3142, Vec2i(-115, 2817),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(-1, 0, 7, 4),
+          PatternSideAdjacency(-1, 0, 4, 1),
+          PatternSideAdjacency(0, 0, 3, 1),
+          PatternSideAdjacency(0, 0, 4, 3),
+          PatternSideAdjacency(0, 0, 6, 1)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(-1, 0, 7, 0),
+            PatternCornerAdjacency(0, 0, 6, 1)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(-1, 0, 4, 2),
+            PatternCornerAdjacency(-1, 0, 7, 4)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 3, 2),
+            PatternCornerAdjacency(-1, 0, 2, 3),
+            PatternCornerAdjacency(-1, 0, 4, 1)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 3, 1),
+            PatternCornerAdjacency(0, 0, 4, 4)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 6, 2),
+            PatternCornerAdjacency(0, 0, 7, 3),
+            PatternCornerAdjacency(0, 0, 4, 3)
+          ])
+        ])
+      ),
+      PatternTile( // tile 6
+        1, 3142, Vec2i(866, 3317),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(-1, 0, 7, 0),
+          PatternSideAdjacency(0, 0, 5, 4),
+          PatternSideAdjacency(0, 0, 7, 2),
+          PatternSideAdjacency(1, 1, 1, 2),
+          PatternSideAdjacency(0, 1, 0, 0)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(0, 1, 0, 0),
+            PatternCornerAdjacency(-1, 0, 7, 1)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(0, 0, 5, 0),
+            PatternCornerAdjacency(-1, 0, 7, 0)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 5, 4),
+            PatternCornerAdjacency(0, 0, 4, 3),
+            PatternCornerAdjacency(0, 0, 7, 3)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 7, 2),
+            PatternCornerAdjacency(1, 1, 1, 3),
+            PatternCornerAdjacency(1, 1, 0, 4)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 1, 0, 1),
+            PatternCornerAdjacency(1, 1, 1, 2)
+          ])
+        ])
+      ),
+      PatternTile( // tile 7
+        1, 0, Vec2i(1466, 2500),
+        List([#][ // sideAdjacenciesBySideIndex
+          PatternSideAdjacency(1, 0, 6, 0),
+          PatternSideAdjacency(1, 1, 0, 4),
+          PatternSideAdjacency(0, 0, 6, 2),
+          PatternSideAdjacency(0, 0, 4, 2),
+          PatternSideAdjacency(1, 0, 5, 0)
+        ]),
+        List([#][ // cornerIndexToCornerAdjacencies
+          List([#][ // corner 0
+            PatternCornerAdjacency(1, 0, 5, 0),
+            PatternCornerAdjacency(1, 0, 6, 1)
+          ]),
+          List([#][ // corner 4
+            PatternCornerAdjacency(1, 0, 6, 0),
+            PatternCornerAdjacency(1, 1, 0, 0)
+          ]),
+          List([#][ // corner 3
+            PatternCornerAdjacency(0, 0, 6, 3),
+            PatternCornerAdjacency(1, 1, 1, 3),
+            PatternCornerAdjacency(1, 1, 0, 4)
+          ]),
+          List([#][ // corner 2
+            PatternCornerAdjacency(0, 0, 4, 3),
+            PatternCornerAdjacency(0, 0, 5, 4),
+            PatternCornerAdjacency(0, 0, 6, 2)
+          ]),
+          List([#][ // corner 1
+            PatternCornerAdjacency(0, 0, 4, 2),
+            PatternCornerAdjacency(1, 0, 5, 1)
+          ])
+        ])
+      )
+    ]),
+    Vec2i(1599, -1307), // xOffset
+    Vec2i(866, 4307) // yOffset
+  );
+}

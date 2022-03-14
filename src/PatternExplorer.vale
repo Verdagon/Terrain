@@ -1,0 +1,250 @@
+
+func ApatheticPrioritizer(location Location, position Vec2i) int { 0 }
+
+struct LessDistanceFromPrioritizer {
+  from Vec2i;
+}
+func __call(self &!LessDistanceFromPrioritizer, position Vec2i) int {
+  // - because higher is first
+  -(position.distance(self.from))
+}
+
+
+
+
+struct PriorityQueue<T, Comparator>
+where Prot["__call", Refs(&!Comparator, &T, &T), int] {
+  list List<T>;
+  comparator Comparator;
+}
+func PriorityQueue<T, Comparator>(comparator Comparator) PriorityQueue<T, Comparator> {
+  PriorityQueue<T, Comparator>(
+    List<T>(),
+    comparator)
+}
+func len<T, Comparator>(self &PriorityQueue<T, Comparator>) int { self.list.len() }
+func add<T, Comparator>(self &!PriorityQueue<T, Comparator>, element T) {
+  self.list!.add(element);
+}
+func removeMin<T, Comparator>(self &!PriorityQueue<T, Comparator>) T {
+  if self.list.len() == 0 {
+    panic("PriorityQueue.removeMin: Can't remove, is empty!");
+  }
+  minSoFar = self.list.get(0);
+  indexOfMinSoFar = 0;
+  iter = self.list.entries();
+  iter!.next();
+  foreach [index, element] in iter {
+    if (self.comparator)!(element, minSoFar) < 0 {
+      set minSoFar = element;
+      set indexOfMinSoFar = index;
+    }
+  }
+  ret self.list!.remove(indexOfMinSoFar);
+}
+func contains<T, Comparator>(self &PriorityQueue<T, Comparator>, element T) bool {
+  foreach x in self.list {
+    if x == element {
+      ret true;
+    }
+  }
+  ret false;
+}
+func remove<T, Comparator>(self &!PriorityQueue<T, Comparator>, needle T) {
+  foreach i in range(0, self.list.len()) {
+    if self.list.get(i) == needle {
+      self.list!.remove(i);
+      ret void();
+    }
+  }
+  panic("PriorityQueue.remove: Needle doesnt exist!");
+}
+
+
+struct TupFirstComparator<T> where T Ref { }
+func __call<T>(self &!TupFirstComparator<T>, a T, b T) int {
+  if a.0 < b.0 { -1 }
+  else if a.0 > b.0 { 1 }
+  else { 0 }
+}
+
+
+struct PatternExplorer<Prioritizer, Filter>
+where Prot["__call", Refs(&!Prioritizer, Location, Vec2i), int],
+    Prot["__call", Refs(&!Filter, Location, int), bool] {
+  pattern &Pattern;
+  considerCornersAdjacent bool;
+  prioritizer Prioritizer;
+  filter Filter;
+  exploredPoints HashSet<Location, LocationHasher, LocationEquator>;
+  unexploredPoints HashSet<Location, LocationHasher, LocationEquator>;
+  unexploredPointsPrioritized PriorityQueue<(int, Location), TupFirstComparator<(int, Location)>>;
+}
+
+func PatternExplorer<Prioritizer, Filter>(
+    pattern &Pattern,
+    considerCornersAdjacent bool,
+    prioritizer Prioritizer,
+    filter Filter,
+    originLocation Location)
+PatternExplorer<Prioritizer, Filter>
+where Prot["__call", Refs(&!Prioritizer, Location, Vec2i), int],
+    Prot["__call", Refs(&!Filter, Location, int), bool]
+{
+  self.pattern = pattern;
+  self.considerCornersAdjacent = considerCornersAdjacent;
+  self.prioritizer = prioritizer;
+  self.filter = filter;
+
+  self.exploredPoints =
+      HashSet<Location, LocationHasher, LocationEquator>(
+          LocationHasher(), LocationEquator());
+  self.unexploredPoints =
+      HashSet<Location, LocationHasher, LocationEquator>(
+          LocationHasher(), LocationEquator());
+
+  self.unexploredPoints!.add(originLocation);
+
+  originCenter = self.pattern.GetTileCenter(originLocation);
+
+  self.unexploredPointsPrioritized =
+      PriorityQueue<(int, Location), TupFirstComparator<(int, Location)>>(
+          TupFirstComparator<(int, Location)>());
+  self.unexploredPointsPrioritized!.add(
+    (
+      (self.prioritizer)!(originLocation, originCenter),
+      originLocation));
+
+  vassert((self.filter)!(originLocation, originCenter), "Origin location doesn't match filter!");
+}
+
+func Next<Prioritizer, Filter>(self &!PatternExplorer<Prioritizer, Filter>)
+Opt<(Location, int)> {
+  if self.unexploredPointsPrioritized.len() == 0 {
+    ret None<(Location, int)>();
+  }
+
+  [thisPriority, thisLoc] = self.unexploredPointsPrioritized!.removeMin();
+
+  foreach adjacentLoc in self.pattern.GetAdjacentLocations(thisLoc, self.considerCornersAdjacent) {
+    center = self.pattern.GetTileCenter(adjacentLoc);
+    if (self.filter)!(adjacentLoc, center) {
+      adjacentPriority = (self.prioritizer)!(adjacentLoc, center);
+      if not self.exploredPoints.contains(adjacentLoc) and
+          not self.unexploredPoints.contains(adjacentLoc) {
+        self.unexploredPoints!.add(adjacentLoc);
+        self.unexploredPointsPrioritized!.add((adjacentPriority, adjacentLoc));
+      }
+    }
+  }
+
+  self.exploredPoints!.add(thisLoc);
+
+  self.unexploredPoints!.remove(thisLoc);
+
+  ret Some((thisLoc, thisPriority));
+}
+
+func ExploreWhile<Predicate, Prioritizer, Filter>(
+    self &!PatternExplorer<Prioritizer, Filter>,
+    predicate Predicate,
+    maxLocations int, // default -1
+    scoreThreshold int) // default negative inf
+List<Location>
+where Prot["__call", Refs(&!Predicate, Location), bool]
+{
+  foundLocations = List<Location>();
+  j = 0;
+  while true {
+    if foundLocations.len() > 10000 {
+      panic("Pattern explorer out of control!");
+    }
+    if maxLocations != -1 and j >= maxLocations {
+      break;
+    }
+
+    maybe_next = self!.Next();
+    if maybe_next.isEmpty() {
+      break;
+    }
+    [nextLocation, nextScore] = (maybe_next).get("ExploreWhile: No next!");
+
+    if nextScore < scoreThreshold {
+      break;
+    }
+
+    if ((&!predicate)!(nextLocation)) {
+      foundLocations!.add(nextLocation);
+    } else {
+      break;
+    }
+
+    set j = j + 1;
+  }
+
+
+  ret foundLocations;
+}
+
+//struct PriorityAndLocation {
+//  public struct Comparer : IComparer<PriorityAndLocation> {
+//    public int Compare(PriorityAndLocation a, PriorityAndLocation b) {
+//      if (a.priority != b.priority) {
+//        // - because higher is first
+//        return -Math.Sign(a.priority - b.priority);
+//      }
+//      // Sometimes we get ties, for example between (-1, 0, 0) and (1, 0, 0)
+//      // relative to (0, 0, 0).
+//      return (new Location.Comparer()).Compare(a.location, b.location);
+//    }
+//  }
+//
+//  public readonly float priority;
+//  public readonly Location location;
+//
+//  public PriorityAndLocation(float priority, Location location) {
+//    this.priority = priority;
+//    this.location = location;
+//  }
+//}
+
+// This is used to prioritize which ones to explore first.
+// Numbers that are higher are explored with more interest.
+// For example, ApatheticPatternExplorerPrioritizer treats all locations
+// equally and therefore just spreads out in a breadth-first search (which
+// is almost a circle but not exactly).
+// To get an exact circle, you'd use LessDistanceFromPrioritizer which
+// returns the negative distance from the start. It's negative because
+// higher numbers are explored first.
+// To make a square, make one that returns the difference between the X
+// distance and Y distance from the start.
+//interface IPatternExplorerPrioritizer {
+//  func GetPriority(location Location, position Vec2) float;
+//}
+//
+//interface IPatternExplorerFilter {
+//  func Matches(virtual self &IPatternExplorerFilter, location Location, position Vec2) bool;
+//}
+
+  //public PatternExplorer(pattern &Pattern, considerCornersAdjacent bool, originLocation Location) :
+  //this(
+  //    pattern,
+  //    considerCornersAdjacent,
+  //    originLocation,
+  //    new LessDistanceFromPrioritizer(pattern.GetTileCenter(originLocation)),
+  //    (Location, Vec2) => { return true; }) {
+  //}
+
+
+//public Location Next() {
+//
+//  Location loc = new Location(0, 0, 0);
+//  float priority = 0;
+//
+//  if (Next(out loc, out priority, context)) {
+//    return loc;
+//  } else {
+//
+//    throw new Exception("No next element!");
+//  }
+//}
