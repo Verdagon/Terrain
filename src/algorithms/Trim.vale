@@ -1,0 +1,19 @@
+
+func Trim(map &PatternMap<bool>) {
+  while
+      trimLocs = FindTrimLocs(map);
+      trimLocs.len() > 0 {
+    trimLocs.each({ map.tiles.remove(_); });
+  }
+}
+
+func FindTrimLocs(map &PatternMap<bool>) List<Location> {
+  trimLocs = List<Location>();
+  foreach [loc, unused] in map.tiles {
+    adjacentLocs = map.GetAdjacentExistingLocations(loc, false);
+    if adjacentLocs.len() <= 1 {
+      trimLocs.add(loc);
+    }
+  }
+  ret trimLocs;
+}

@@ -1,0 +1,29 @@
+
+func FillHoles(map &PatternMap<bool>) {
+  while
+      holeLocs = FindHoles(map);
+      holeLocs.len() > 0 {
+    holeLocs.each({ map.tiles.add(_, true); });
+  }
+}
+
+func FindHoles(map &PatternMap<bool>) HashSet<Location, LocationHasher, LocationEquator> {
+  holeLocs = HashSet<Location>(LocationHasher(), LocationEquator());
+
+  foreach [existingLoc, unused] in map.tiles {
+    nearExistingLocs = map.pattern.GetAdjacentLocations(existingLoc, false);
+    foreach loc in &nearExistingLocs {
+      if not map.tiles.ContainsKey(loc) {
+        adjacentPatternLocs = map.pattern.GetAdjacentLocations(loc, false);
+        adjacentExistingLocs = map.GetAdjacentExistingLocations(loc, false);
+        if adjacentPatternLocs.len() - adjacentExistingLocs.len() <= 1 {
+          if not holeLocs.contains(loc) {
+            holeLocs.add(loc);
+          }
+        }
+      }
+    }
+  }
+
+  ret holeLocs;
+}

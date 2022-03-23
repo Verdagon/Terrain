@@ -161,7 +161,7 @@ func DistanceBetween(locA Location, locB Location) int {
 //                     unrotatedCorner.y * Math.Sin(rotateRadians)),
 //                 (int)(unrotatedCorner.y * Math.Cos(rotateRadians) +
 //                     unrotatedCorner.x * Math.Sin(rotateRadians)));
-//         results!.add(rotatedCorner);
+//         results.add(rotatedCorner);
 //       }
 
 //       ret results;
@@ -171,7 +171,7 @@ func DistanceBetween(locA Location, locB Location) int {
 //       center = GetTileCenter(loc);
 //       List<Vec2i> results = List<Vec2i>();
 //       foreach (var relativeCorner in GetRelativeCornerPositions(loc)) {
-//         results!.add(center.plus(relativeCorner));
+//         results.add(center.plus(relativeCorner));
 //       }
 //       ret results;
 //     }
@@ -190,7 +190,7 @@ List<Location> {
             sideAdjacency.group_relative_y,
             sideAdjacency.tile_index);
     if not result.contains(location) {
-      result!.add(location);
+      result.add(location);
     }
   }
   if adjacentCornersToo {
@@ -198,7 +198,7 @@ List<Location> {
       foreach cornerAdjacency in cornerAdjacencies {
         location = Location(cornerAdjacency.group_relative_x, cornerAdjacency.group_relative_y, cornerAdjacency.tile_index);
         if not result.contains(location) {
-          result!.add(location);
+          result.add(location);
         }
       }
     }
@@ -224,7 +224,7 @@ func GetAdjacentLocations(
 List<Location> {
   result = List<Location>();
   foreach relativeLoc in pattern.getRelativeAdjacentLocations(loc.index_in_group, considerCornersAdjacent) {
-    result!.add(Location(
+    result.add(Location(
       loc.group_x + relativeLoc.group_x,
       loc.group_y + relativeLoc.group_y,
       relativeLoc.index_in_group));
@@ -245,13 +245,13 @@ HashSet<Location, LocationHasher, LocationEquator> {
     adjacents = pattern.GetAdjacentLocations(originalLocation, considerCornersAdjacent);
     if includeSourceLocs {
       if not adjacents.contains(originalLocation) {
-        adjacents!.add(originalLocation);
+        adjacents.add(originalLocation);
       }
     }
     foreach adjacentLocation in adjacents {
       if includeSourceLocs or not sourceLocs.contains(adjacentLocation) {
         if not result.contains(adjacentLocation) {
-          result!.add(adjacentLocation);
+          result.add(adjacentLocation);
         }
       }
     }

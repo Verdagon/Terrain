@@ -4,7 +4,7 @@ func ApatheticPrioritizer(location Location, position Vec2i) int { 0 }
 struct LessDistanceFromPrioritizer {
   from Vec2i;
 }
-func __call(self &!LessDistanceFromPrioritizer, position Vec2i) int {
+func __call(self &LessDistanceFromPrioritizer, position Vec2i) int {
   // - because higher is first
   -(position.distance(self.from))
 }
@@ -13,7 +13,7 @@ func __call(self &!LessDistanceFromPrioritizer, position Vec2i) int {
 
 
 struct PriorityQueue<T, Comparator>
-where Prot["__call", Refs(&!Comparator, &T, &T), int] {
+where Prot["__call", Refs(&Comparator, &T, &T), int] {
   list List<T>;
   comparator Comparator;
 }
@@ -23,24 +23,24 @@ func PriorityQueue<T, Comparator>(comparator Comparator) PriorityQueue<T, Compar
     comparator)
 }
 func len<T, Comparator>(self &PriorityQueue<T, Comparator>) int { self.list.len() }
-func add<T, Comparator>(self &!PriorityQueue<T, Comparator>, element T) {
-  self.list!.add(element);
+func add<T, Comparator>(self &PriorityQueue<T, Comparator>, element T) {
+  self.list.add(element);
 }
-func removeMin<T, Comparator>(self &!PriorityQueue<T, Comparator>) T {
+func removeMin<T, Comparator>(self &PriorityQueue<T, Comparator>) T {
   if self.list.len() == 0 {
     panic("PriorityQueue.removeMin: Can't remove, is empty!");
   }
   minSoFar = self.list.get(0);
   indexOfMinSoFar = 0;
   iter = self.list.entries();
-  iter!.next();
+  iter.next();
   foreach [index, element] in iter {
-    if (self.comparator)!(element, minSoFar) < 0 {
+    if (self.comparator)(element, minSoFar) < 0 {
       set minSoFar = element;
       set indexOfMinSoFar = index;
     }
   }
-  ret self.list!.remove(indexOfMinSoFar);
+  ret self.list.remove(indexOfMinSoFar);
 }
 func contains<T, Comparator>(self &PriorityQueue<T, Comparator>, element T) bool {
   foreach x in self.list {
@@ -50,10 +50,10 @@ func contains<T, Comparator>(self &PriorityQueue<T, Comparator>, element T) bool
   }
   ret false;
 }
-func remove<T, Comparator>(self &!PriorityQueue<T, Comparator>, needle T) {
+func remove<T, Comparator>(self &PriorityQueue<T, Comparator>, needle T) {
   foreach i in range(0, self.list.len()) {
     if self.list.get(i) == needle {
-      self.list!.remove(i);
+      self.list.remove(i);
       ret void();
     }
   }
@@ -62,7 +62,7 @@ func remove<T, Comparator>(self &!PriorityQueue<T, Comparator>, needle T) {
 
 
 struct TupFirstComparator<T> where T Ref { }
-func __call<T>(self &!TupFirstComparator<T>, a T, b T) int {
+func __call<T>(self &TupFirstComparator<T>, a T, b T) int {
   if a.0 < b.0 { -1 }
   else if a.0 > b.0 { 1 }
   else { 0 }
@@ -70,8 +70,8 @@ func __call<T>(self &!TupFirstComparator<T>, a T, b T) int {
 
 
 struct PatternExplorer<Prioritizer, Filter>
-where Prot["__call", Refs(&!Prioritizer, Location, Vec2i), int],
-    Prot["__call", Refs(&!Filter, Location, int), bool] {
+where Prot["__call", Refs(&Prioritizer, Location, Vec2i), int],
+    Prot["__call", Refs(&Filter, Location, int), bool] {
   pattern &Pattern;
   considerCornersAdjacent bool;
   prioritizer Prioritizer;
@@ -88,8 +88,8 @@ func PatternExplorer<Prioritizer, Filter>(
     filter Filter,
     originLocation Location)
 PatternExplorer<Prioritizer, Filter>
-where Prot["__call", Refs(&!Prioritizer, Location, Vec2i), int],
-    Prot["__call", Refs(&!Filter, Location, int), bool]
+where Prot["__call", Refs(&Prioritizer, Location, Vec2i), int],
+    Prot["__call", Refs(&Filter, Location, int), bool]
 {
   self.pattern = pattern;
   self.considerCornersAdjacent = considerCornersAdjacent;
@@ -103,55 +103,55 @@ where Prot["__call", Refs(&!Prioritizer, Location, Vec2i), int],
       HashSet<Location, LocationHasher, LocationEquator>(
           LocationHasher(), LocationEquator());
 
-  self.unexploredPoints!.add(originLocation);
+  self.unexploredPoints&.add(originLocation);
 
   originCenter = self.pattern.GetTileCenter(originLocation);
 
   self.unexploredPointsPrioritized =
       PriorityQueue<(int, Location), TupFirstComparator<(int, Location)>>(
           TupFirstComparator<(int, Location)>());
-  self.unexploredPointsPrioritized!.add(
+  self.unexploredPointsPrioritized&.add(
     (
-      (self.prioritizer)!(originLocation, originCenter),
+      (self.prioritizer)(originLocation, originCenter),
       originLocation));
 
-  vassert((self.filter)!(originLocation, originCenter), "Origin location doesn't match filter!");
+  vassert((self.filter)(originLocation, originCenter), "Origin location doesn't match filter!");
 }
 
-func Next<Prioritizer, Filter>(self &!PatternExplorer<Prioritizer, Filter>)
+func Next<Prioritizer, Filter>(self &PatternExplorer<Prioritizer, Filter>)
 Opt<(Location, int)> {
   if self.unexploredPointsPrioritized.len() == 0 {
     ret None<(Location, int)>();
   }
 
-  [thisPriority, thisLoc] = self.unexploredPointsPrioritized!.removeMin();
+  [thisPriority, thisLoc] = self.unexploredPointsPrioritized.removeMin();
 
   foreach adjacentLoc in self.pattern.GetAdjacentLocations(thisLoc, self.considerCornersAdjacent) {
     center = self.pattern.GetTileCenter(adjacentLoc);
-    if (self.filter)!(adjacentLoc, center) {
-      adjacentPriority = (self.prioritizer)!(adjacentLoc, center);
+    if (self.filter)(adjacentLoc, center) {
+      adjacentPriority = (self.prioritizer)(adjacentLoc, center);
       if not self.exploredPoints.contains(adjacentLoc) and
           not self.unexploredPoints.contains(adjacentLoc) {
-        self.unexploredPoints!.add(adjacentLoc);
-        self.unexploredPointsPrioritized!.add((adjacentPriority, adjacentLoc));
+        self.unexploredPoints.add(adjacentLoc);
+        self.unexploredPointsPrioritized.add((adjacentPriority, adjacentLoc));
       }
     }
   }
 
-  self.exploredPoints!.add(thisLoc);
+  self.exploredPoints.add(thisLoc);
 
-  self.unexploredPoints!.remove(thisLoc);
+  self.unexploredPoints.remove(thisLoc);
 
   ret Some((thisLoc, thisPriority));
 }
 
 func ExploreWhile<Predicate, Prioritizer, Filter>(
-    self &!PatternExplorer<Prioritizer, Filter>,
+    self &PatternExplorer<Prioritizer, Filter>,
     predicate Predicate,
     maxLocations int, // default -1
     scoreThreshold int) // default negative inf
 List<Location>
-where Prot["__call", Refs(&!Predicate, Location), bool]
+where Prot["__call", Refs(&Predicate, Location), bool]
 {
   foundLocations = List<Location>();
   j = 0;
@@ -163,7 +163,7 @@ where Prot["__call", Refs(&!Predicate, Location), bool]
       break;
     }
 
-    maybe_next = self!.Next();
+    maybe_next = self.Next();
     if maybe_next.isEmpty() {
       break;
     }
@@ -173,8 +173,8 @@ where Prot["__call", Refs(&!Predicate, Location), bool]
       break;
     }
 
-    if ((&!predicate)!(nextLocation)) {
-      foundLocations!.add(nextLocation);
+    if ((&predicate)(nextLocation)) {
+      foundLocations.add(nextLocation);
     } else {
       break;
     }

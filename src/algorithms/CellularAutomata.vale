@@ -1,0 +1,31 @@
+
+
+
+func CellularAutomata(
+    considerCornersAdjacent bool,
+    rand &XS32Rand,
+    map &PatternMap<bool>)
+PatternMap<bool> {
+  new_map = PatternMap<bool>(make_pentagon_9_pattern());
+
+  foreach [loc, _] in &map.tiles {
+    neighbors = map.GetAdjacentExistingLocations(loc, considerCornersAdjacent);
+    num_walkable_neighbors = 0;
+    foreach neighbor in &neighbors {
+      if map.tiles.get(neighbor).get("wat") {
+        set num_walkable_neighbors = num_walkable_neighbors + 1;
+      }
+    }
+    new_impassable =
+      if num_walkable_neighbors * 2 == neighbors.len() {
+        (rand.Next() mod 2i64) == 0i64
+      } else {
+        num_walkable_neighbors > neighbors.len() / 2
+      };
+
+    new_map.tiles.add(loc, new_impassable);
+  }
+
+  ret new_map;
+}
+

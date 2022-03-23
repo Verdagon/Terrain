@@ -1,0 +1,31 @@
+
+func MakeLakyForestMap(rand &XS32Rand) PatternMap<bool> {
+  considerCornersAdjacent = true;
+  map_0 = MakeCircle(&rand, make_pentagon_9_pattern(), considerCornersAdjacent);
+  map_1 = CellularAutomata(considerCornersAdjacent, &rand, &map_0);
+  map_2 = CellularAutomata(considerCornersAdjacent, &rand, &map_1);
+  //map_3 = CellularAutomata(considerCornersAdjacent, &rand, &map_2);
+  
+  map_4 = PatternMap<bool>(make_pentagon_9_pattern());
+  foreach [loc, walkable] in map_2.tiles {
+    if walkable {
+      map_4.tiles.add(loc, true);
+    }
+  }
+
+  ConnectIslands(&rand, &map_4, 2);
+
+  Trim(&map_4);
+  FillHoles(&map_4);
+
+  locs =
+      (&map_4.tiles.KeysIter())
+      .HashSet(LocationHasher(), LocationEquator());
+  boundary_locs =
+      map_4.pattern.GetAdjacentLocations(&locs, false, considerCornersAdjacent);
+  foreach boundary_loc in boundary_locs {
+    map_4.tiles.add(boundary_loc, false);
+  }
+
+  ret map_4;
+}

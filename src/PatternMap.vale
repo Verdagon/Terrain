@@ -21,9 +21,9 @@ func GetAdjacentExistingLocations<T>(
     adjacentCornersToo bool)
 List<Location> {
   result = List<Location>();
-  self.pattern.GetAdjacentLocations(loc, adjacentCornersToo).each(adjacentLoc => {
+  self.pattern.GetAdjacentLocations(loc, adjacentCornersToo)&.each(adjacentLoc => {
     if (self.TileExists(adjacentLoc)) {
-      result!.add(adjacentLoc);
+      result.add(adjacentLoc);
     }
   });
   ret result;
@@ -42,7 +42,7 @@ HashSet<Location, LocationHasher, LocationEquator> {
     HashSet<Location, LocationHasher, LocationEquator>(LocationHasher(), LocationEquator());
   foreach adjacentLoc in adjacents {
     if self.TileExists(adjacentLoc) {
-      result!.add(adjacentLoc);
+      result..add(adjacentLoc);
     }
   }
   ret result;

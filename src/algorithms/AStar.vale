@@ -9,7 +9,7 @@ struct LowerFScoreComparer {
   fGAndCameFromByLocation &HashMap<Location, GFAndCameFrom, LocationHasher, LocationEquator>;
 }
 
-func __call(self &!LowerFScoreComparer, a Location, b Location) int {
+func __call(self &LowerFScoreComparer, a Location, b Location) int {
   aF int = 2147483647;
   if self.fGAndCameFromByLocation.ContainsKey(a) {
     set aF = self.fGAndCameFromByLocation.get(a).get("blerp a").fScore;
@@ -45,11 +45,11 @@ func Go<ICanStep>(
     cornersAreAdjacent bool,
     canStep ICanStep)
 List<Location>
-where Prot["__call", Refs(&!ICanStep, Location, Location, int), bool] {
+where Prot["__call", Refs(&ICanStep, Location, Location, int), bool] {
   closedLocations =
       HashSet<Location, LocationHasher, LocationEquator>(
           LocationHasher(), LocationEquator());
-  closedLocations!.add(startLocation);
+  closedLocations.add(startLocation);
   maybeExploration =
       AStarExploration(
           closedLocations,
@@ -80,11 +80,11 @@ func AStarExploration<
     costGuesser IFutureCostGuesser,
     determineCost IDetermineCost)
 Opt<AStarExploration>
-where Prot["__call", Refs(&!ICanStep, Location, Location, int), bool],
-    Prot["__call", Refs(&!IStopCondition, Location), bool],
-    Prot["__call", Refs(&!IFutureCostGuesser, Location), int],
-    Prot["__call", Refs(&!IDetermineCost, Location, Location), int],
-    Prot["__call", Refs(&!IGetAdjacents, Location), []Location]
+where Prot["__call", Refs(&ICanStep, Location, Location, int), bool],
+    Prot["__call", Refs(&IStopCondition, Location), bool],
+    Prot["__call", Refs(&IFutureCostGuesser, Location), int],
+    Prot["__call", Refs(&IDetermineCost, Location, Location), int],
+    Prot["__call", Refs(&IGetAdjacents, Location), []Location]
 {
   //UnityEngine.Debug.Log("Pathing from " + startLocation + " to " + targetLocation);
 
@@ -104,54 +104,54 @@ where Prot["__call", Refs(&!ICanStep, Location, Location, int), bool],
 
   foreach startLocation in startLocations {
     vassert(not stopCondition(startLocation), "Start meets stop condition!");
-    openLocationsLowestFFirst!.add(startLocation);
+    openLocationsLowestFFirst.add(startLocation);
     //println("Adding start location {startLocation}");
-    gFAndCameFromByLocation!.add(
+    gFAndCameFromByLocation.add(
         startLocation,
-        GFAndCameFrom(costGuesser!(startLocation), 0, startLocation));
+        GFAndCameFrom(costGuesser(startLocation), 0, startLocation));
   }
   
   while openLocationsLowestFFirst.len() > 0 {
-    currentLocation = openLocationsLowestFFirst!.removeMin();
+    currentLocation = openLocationsLowestFFirst.removeMin();
     //println("Pulled off current location {currentLocation}");
 
     //println("Added closed location {currentLocation}");
-    closedLocations!.add(currentLocation);
+    closedLocations.add(currentLocation);
 
-    if (stopCondition!(currentLocation)) {
+    if (stopCondition(currentLocation)) {
       //println("Hit stop {currentLocation}");
       ret Some(AStarExploration(closedLocations, gFAndCameFromByLocation));
     }
 
-    neighbors = getAdjacents!(currentLocation);
+    neighbors = getAdjacents(currentLocation);
     foreach neighborLocation in neighbors {
       //println("Looking at neighbor {neighborLocation}");
       if not closedLocations.contains(neighborLocation) {
         //println("Not closed, continuing");
         tentativeGScore =
             gFAndCameFromByLocation.get(currentLocation).get("blerp d").gScore +
-            determineCost!(currentLocation, neighborLocation);
-        if not canStep!(currentLocation, neighborLocation, tentativeGScore) {
+            determineCost(currentLocation, neighborLocation);
+        if not canStep(currentLocation, neighborLocation, tentativeGScore) {
           //println("Cant step, continuing");
         } else {
           //println("Can step");
           if not openLocationsLowestFFirst.contains(neighborLocation) {
             //println("Discovered a new node!");
             // Discovered a new node
-            openLocationsLowestFFirst!.add(neighborLocation);
+            openLocationsLowestFFirst.add(neighborLocation);
 
             // THIS IS REPEATED
             //println("Recording, adding {neighborLocation}");
             // Since the comparer depends on gFAndCameFromByLocation, we need to make it recompare.
             // To do that, we remove and afterwards re-add.
-            openLocationsLowestFFirst!.remove(neighborLocation);
-            gFAndCameFromByLocation!.add(
+            openLocationsLowestFFirst.remove(neighborLocation);
+            gFAndCameFromByLocation.add(
                 neighborLocation,
                 GFAndCameFrom(
                     tentativeGScore,
-                    tentativeGScore + costGuesser!(neighborLocation),
+                    tentativeGScore + costGuesser(neighborLocation),
                     currentLocation));
-            openLocationsLowestFFirst!.add(neighborLocation);
+            openLocationsLowestFFirst.add(neighborLocation);
           } else if tentativeGScore >= gFAndCameFromByLocation.get(neighborLocation).get("blerp e").gScore {
             //println("Our tentative G score is more, skipping.");
             // continue
@@ -163,15 +163,15 @@ where Prot["__call", Refs(&!ICanStep, Location, Location, int), bool],
             //println("Recording, adding {neighborLocation}");
             // Since the comparer depends on gFAndCameFromByLocation, we need to make it recompare.
             // To do that, we remove and afterwards re-add.
-            openLocationsLowestFFirst!.remove(neighborLocation);
-            gFAndCameFromByLocation!.remove(neighborLocation);
-            gFAndCameFromByLocation!.add(
+            openLocationsLowestFFirst.remove(neighborLocation);
+            gFAndCameFromByLocation.remove(neighborLocation);
+            gFAndCameFromByLocation.add(
                 neighborLocation,
                 GFAndCameFrom(
                     tentativeGScore,
-                    tentativeGScore + costGuesser!(neighborLocation),
+                    tentativeGScore + costGuesser(neighborLocation),
                     currentLocation));
-            openLocationsLowestFFirst!.add(neighborLocation);
+            openLocationsLowestFFirst.add(neighborLocation);
           }
         }
       }
@@ -185,7 +185,7 @@ struct DistanceCostGuesser {
   pattern &Pattern;
   target Location;
 }
-func __call(self &!DistanceCostGuesser, from Location) int {
+func __call(self &DistanceCostGuesser, from Location) int {
   self.pattern.GetTileCenter(from).distance(self.pattern.GetTileCenter(self.target))
 }
 
@@ -207,7 +207,7 @@ func GetPathTo(self &AStarExploration, targetLocation Location) List<Location> {
     if self.gFAndCameFromByLocation.get(currentLocation).get("blerp f").cameFrom == currentLocation {
       ret (path).reverse();
     }
-    path!.add(currentLocation);
+    path.add(currentLocation);
     set currentLocation = self.gFAndCameFromByLocation.get(currentLocation).get("blerp g").cameFrom;
   }
   panic("unreachable");

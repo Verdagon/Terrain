@@ -1,0 +1,24 @@
+
+func MakeCircle(rand &XS32Rand, pattern Pattern, considerCornersAdjacent bool) PatternMap<bool> {
+  map = PatternMap<bool>(pattern);
+
+  explorer =
+      PatternExplorer(
+          &map.pattern,
+          considerCornersAdjacent,
+          (a, b) => ApatheticPrioritizer(a, b), // prioritizer
+          (_, _) => true, // filter
+          Location(0, 0, 0));
+
+  results =
+      explorer.ExploreWhile(
+          { map.pattern.GetDistanceBetween(_, Location(0, 0, 0)) < 18000 },
+          -1,
+          -1000000);
+
+  foreach loc in &results {
+    map.tiles.add(loc, (rand.Next() mod 2i64) == 0i64);
+  }
+
+  ret map;
+}

@@ -1,0 +1,15 @@
+
+struct XS32Rand {
+  seed! i64;
+}
+// From https://github.com/cgmb/euler/blob/a906355343dc0d320858a7b00504040d04c053f7/misc/rng.c
+// State must point to a non-zero value.
+// Based on "An Experimental Exploration of Marsaglia's xorshift Generators, Scrambled" (2016)
+func Next(self &XS32Rand) i64 {
+  x = self.seed;
+  set x = x xor (x rshift 12);
+  set x = x xor (x lshift 25);
+  set x = x xor (x rshift 27);
+  set self.seed = x;
+  ret x * 2685821657736338717i64 rshift 32;
+}
