@@ -1,0 +1,46 @@
+
+//func FindLargeHoles<F>(
+//    pattern &Pattern,
+//    allPossibleLocs &HashSet<Location, LocationHasher, LocationEquator>,
+//    filter F)
+//List<HashSet<Location, LocationHasher, LocationEquator>>
+//where Prot["__call", Refs(&F, Location), bool] {
+
+//  exploredLocs = HashSet<Location>(LocationHasher(), LocationEquator());
+
+//  result = List<HashSet<Location, LocationHasher, LocationEquator>>();
+
+//  foreach loc in allPossibleLocs {
+//    if filter(loc) {
+//      if not exploredLocs.contains(loc) {
+//        holeLocs =
+//            HashSet<Location, LocationHasher, LocationEquator>(
+//                LocationHasher(), LocationEquator());
+//        FloodLargeHole(pattern, &filter, &exploredLocs, &holeLocs, loc);
+//        result.add(holeLocs);
+//      }
+//    }
+//  }
+
+//  ret result;
+//}
+
+//func FloodLargeHole<F>(
+//    pattern &Pattern,
+//    filter F,
+//    exploredLocs &HashSet<Location, LocationHasher, LocationEquator>,
+//    holeLocs &HashSet<Location, LocationHasher, LocationEquator>,
+//    thisLoc Location)
+//where Prot["__call", Refs(&F, Location), bool] {
+
+//  holeLocs.add(thisLoc);
+
+//  adjacentLocs = pattern.GetAdjacentLocations(thisLoc, false);
+//  foreach adjacentLoc in &adjacentLocs {
+//    if filter(thisLoc) {
+//      if not exploredLocs.contains(thisLoc) {
+//        FloodLargeHole(pattern, filter, exploredLocs, holeLocs, thisLoc);
+//      }
+//    }
+//  }
+//}

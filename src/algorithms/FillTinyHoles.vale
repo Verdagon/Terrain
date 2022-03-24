@@ -1,13 +1,13 @@
 
-func FillHoles(map &PatternMap<bool>) {
+func FillTinyHoles(map &PatternMap<bool>) {
   while
-      holeLocs = FindHoles(map);
+      holeLocs = FindTinyHoles(map);
       holeLocs.len() > 0 {
     holeLocs.each({ map.tiles.add(_, true); });
   }
 }
 
-func FindHoles(map &PatternMap<bool>) HashSet<Location, LocationHasher, LocationEquator> {
+func FindTinyHoles(map &PatternMap<bool>) HashSet<Location, LocationHasher, LocationEquator> {
   holeLocs = HashSet<Location>(LocationHasher(), LocationEquator());
 
   foreach [existingLoc, unused] in map.tiles {

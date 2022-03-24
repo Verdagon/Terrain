@@ -16,15 +16,18 @@ func MakeLakyForestMap(rand &XS32Rand) PatternMap<bool> {
   ConnectIslands(&rand, &map_4, 2);
 
   Trim(&map_4);
-  FillHoles(&map_4);
+  FillTinyHoles(&map_4);
 
-  locs =
-      (&map_4.tiles.KeysIter())
-      .HashSet(LocationHasher(), LocationEquator());
-  boundary_locs =
-      map_4.pattern.GetAdjacentLocations(&locs, false, considerCornersAdjacent);
-  foreach boundary_loc in boundary_locs {
-    map_4.tiles.add(boundary_loc, false);
+  //holes =
+  //    FindLargeHoles(
+  //        map_0.pattern,
+  //        &map_0.tiles.KeysIter()&.HashSet(LocationHasher(), LocationEquator()),
+  //        { not map_4.tiles.ContainsKey(_) });
+
+  foreach [loc, unused] in map_0.tiles {
+    if not map_4.tiles.ContainsKey(loc) {
+      map_4.tiles.add(loc, false);
+    }
   }
 
   ret map_4;
